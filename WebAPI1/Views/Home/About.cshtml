@@ -1,0 +1,120 @@
+﻿
+
+<div class="jumbotron">
+    <h1>ASP.NET</h1>
+    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
+    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h2>List Category</h2>
+        <div id="ListCategory">
+
+        </div>
+
+
+    </div>
+    <div class="col-md-4">
+        <h2>List Product</h2>
+        <div id="ListProduct">
+
+        </div>
+
+
+    </div>
+    <div class="col-md-4">
+        <h2>Detail</h2>
+        <div id="DetailProduct">
+
+        </div>
+
+
+    </div>
+</div>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var token = sessionStorage.tokenKey;
+            if (!token) {
+                window.location.href = "http://localhost:49918";
+            }
+            $.ajax({
+                type: 'GET',
+                url: '@Url.RouteUrl("DefaultApi", new { httproute = true , controller = "Categories" })',//'../api/Categories',//http://localhost:49918/api/Categories
+                dataType: 'json',
+                contentType: 'application/json',
+                //data: data ? JSON.stringify(data) : null
+            }).done(function (data) {
+                console.log("success");
+                $.each(data, function (key, value) {
+                    $("#ListCategory").append("<p>"
+                                            + "<a class = 'category' href = 'http://localhost:49918/api/ProductByCategory/" + value.Id + "'>" + value.Name + "</a>"
+                                            + "</p>");
+                });
+
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.log("error");
+            });
+
+            $.ajax({
+                type: 'GET',
+                url: '@Url.RouteUrl("DefaultApi", new { httproute = true , controller = "Products" })',//'../api/Categories',//http://localhost:49918/api/Categories
+                dataType: 'json',
+                contentType: 'application/json',
+                //data: data ? JSON.stringify(data) : null
+            }).done(function (data) {
+                console.log("success");
+                $.each(data, function (key, value) {
+                    $("#ListProduct").append("<p>" + value.Name
+                                            + "<a class = 'product' id = '[" + key + "].Name' href = 'http://localhost:49918/api/Products/" + value.Id + "'> Details </a>"
+                                            + "</p>");
+                });
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.log("error");
+            });
+
+            $("#ListProduct").on("click", ".product", function () {
+                var href = $(this).attr('href');
+                $.ajax({
+                    type: 'GET',
+                    url: href,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                }).done(function (data) {
+                    $("#DetailProduct p").remove();
+                    $("#DetailProduct").append(
+                        "<p>Ten san pham: "+ data.Name +"</p>"
+                        + "<p>Gia: " + data.Price + "</p>"
+                        + "<p>Loai: " + data.Category.Name + "</p>"
+                        );
+                    console.log(data);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.log("error");
+                });
+                return false;
+            });
+
+            $("#ListCategory").on("click", ".category", function () {
+                var href = $(this).attr('href');
+                $.ajax({
+                    type: 'GET',
+                    url: href,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                }).done(function (data) {
+                    $("#ListProduct p").remove();
+                    $.each(data, function (key, value) {
+                        $("#ListProduct").append("<p>" + value.Name
+                                                + "<a class = 'product' id = '[" + key + "].Name' href = 'http://localhost:49918/api/Products/" + value.Id + "'> Details </a>"
+                                                + "</p>");
+                    });
+                    console.log(data);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.log("error");
+                });
+                return false;
+            });
+        });
+    </script>
+
+}
